@@ -22,7 +22,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 设置窗口背景色和固定大小
     this->setStyleSheet("background-color: #f5f5f5;");
-    setFixedSize(500, 400);
+    setFixedSize(500, 500);
 
     // 创建蓝色背景区域
     QFrame *headerFrame = new QFrame(this);
@@ -59,6 +59,12 @@ MainWindow::MainWindow(QWidget *parent)
     lineEditPort->setText("8972");
     lineEditPort->setFixedHeight(30);
 
+    QLabel *remotePortLabel = new QLabel("远程映射端口", this);
+    remotePortLabel->setStyleSheet("font-size: 20px; font-weight: bold; margin-top: 10px;");
+    QLineEdit *lineEditRemotePort = new QLineEdit(this);
+    lineEditRemotePort->setText("6006");
+    lineEditRemotePort->setFixedHeight(30);
+
     pushButtonProxy = new QPushButton("代理", this);
     QLabel *localAddressLabel = new QLabel(this);
 
@@ -75,6 +81,8 @@ MainWindow::MainWindow(QWidget *parent)
     layout->addWidget(lineEditPassword);
     layout->addWidget(portLabel);
     layout->addWidget(lineEditPort);
+    layout->addWidget(remotePortLabel);
+    layout->addWidget(lineEditRemotePort);
     layout->addWidget(pushButtonProxy);
     layout->addWidget(stopButton);
     layout->addWidget(localAddressLabel);
@@ -124,17 +132,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 连接代理按钮点击事件
     connect(pushButtonProxy, &QPushButton::clicked, this,
-            [this, lineEditCommand, lineEditPassword, lineEditPort, localAddressLabel]() {
+            [this, lineEditCommand, lineEditPassword, lineEditPort, localAddressLabel, lineEditRemotePort]() {
         QString command = lineEditCommand->text();
         QString password = lineEditPassword->text();
         QString port = lineEditPort->text();
+        QString remotePort = lineEditRemotePort->text();
 
         if (command.isEmpty() || password.isEmpty() || port.isEmpty()) {
             QMessageBox::warning(this, "警告", "请填写完整信息");
             return;
         }
 
-        QString proxyCommand = "/c plink -C -N -L " + port + ":127.0.0.1:6006 -P " + command.split(" ")[2]
+        QString proxyCommand = "/c plink -C -N -L " + port + ":127.0.0.1:" + remotePort + " -P " + command.split(" ")[2]
                                + " " + command.split(" ")[3] + " -pw " + password + " -no-antispoof -batch";
 
         // std::cout << proxyCommand.toStdString() << "\n";
